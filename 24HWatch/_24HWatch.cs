@@ -16,14 +16,14 @@ namespace _24HWatch
         private readonly int height = 20;
 
         private string textToShow;
-
+        private readonly Keybind debugToggleKey = new Keybind("debugToggleKey", "Toggle Debug", KeyCode.RightBracket);
         private GUIStyle infoText;
         private float sunRotation;
         private float rotateY;
         private GameObject watchHour24;
         private Material hourHandMaterial;
         private Mesh filter;
-        private readonly bool debugging = false;
+        private bool debugging = false;
         private float IsAfternoon()
         {
             sunRotation = GameObject.Find("SUN/Pivot").GetComponent<PlayMakerFSM>().FsmVariables.FindFsmFloat("Rotation").Value;
@@ -87,6 +87,8 @@ namespace _24HWatch
         {
             // All settings should be created here. 
             // DO NOT put anything else here that settings.
+            Keybind.AddHeader(this, "Debugging");
+            Keybind.Add(this, debugToggleKey);
         }
 
         public override void OnSave()
@@ -108,7 +110,14 @@ namespace _24HWatch
         public override void Update()
         {
             //Update is called once per frame
-            if (GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand/").activeSelf)
+            if (this.debugToggleKey.GetKeybindDown())
+            {
+                if (debugging)
+                { debugging = false; }
+                else
+                { debugging = true; }
+            }
+                if (GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand/").activeSelf)
             {
                 if (debugging) { this.textToShow = ""; }
                 rotateY = PlayMakerGlobals.Instance.Variables.FindFsmFloat("TimeRotationHour").Value / 2 * -1;
