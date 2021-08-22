@@ -30,11 +30,12 @@ namespace _24HWatch
         private AssetBundle ab;
         private GameObject digitalWatch;
         private GameObject prefab;
-        private GameObject digitalTime;
-        private GameObject digitalDate;
-        private GameObject digitalDay;
-        private string[] digitalDayArray;
+        private TextMesh digitalTime;
+        private TextMesh digitalDate;
+        private TextMesh digitalDay;
+        private string[] digitalDayArray = new string[] { "Er", "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su" };
         private readonly static Settings testSlider = new Settings("slider", "Watch Mode", 2, AoD);
+        private GameObject wristwatchHand;
         private float HourAdjust()
         {
             sunRotation = GameObject.Find("SUN/Pivot").GetComponent<PlayMakerFSM>().FsmVariables.FindFsmFloat("Rotation").Value;
@@ -98,6 +99,7 @@ namespace _24HWatch
         public override void OnLoad()
         {
             // Called once, when mod is loading after game is fully loade
+            wristwatchHand = GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand");
             realHour = GameObject.Find("MAP/SUN/Pivot/SUN").GetComponent<PlayMakerFSM>().FsmVariables.FindFsmInt("Time").Value;
             realMinute = 0;
             infoText = new GUIStyle
@@ -110,19 +112,10 @@ namespace _24HWatch
             prefab = ab.LoadAsset<GameObject>("digitalwatch.prefab");
             digitalWatch = GameObject.Instantiate(prefab);
             GameObject.Destroy(prefab);
-            digitalDate = digitalWatch.transform.FindChild("digitaldate").gameObject;
-            digitalTime = digitalWatch.transform.FindChild("digitaltime").gameObject;
-            digitalDay = digitalWatch.transform.FindChild("digitalday").gameObject;
-            digitalDayArray = new string[8];
-            digitalDayArray[0] = "Er";
-            digitalDayArray[1] = "Mo";
-            digitalDayArray[2] = "Tu";
-            digitalDayArray[3] = "We";
-            digitalDayArray[4] = "Th";
-            digitalDayArray[5] = "Fr";
-            digitalDayArray[6] = "Sa";
-            digitalDayArray[7] = "Su";
-            digitalWatch.transform.SetParent(GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand").transform);
+            digitalDate = digitalWatch.transform.FindChild("digitaldate").gameObject.GetComponent<TextMesh>();
+            digitalTime = digitalWatch.transform.FindChild("digitaltime").gameObject.GetComponent<TextMesh>();
+            digitalDay = digitalWatch.transform.FindChild("digitalday").gameObject.GetComponent<TextMesh>();
+            digitalWatch.transform.SetParent(wristwatchHand.transform);
             digitalWatch.transform.localPosition = new Vector3(0f, 0f, 0f);
             digitalWatch.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
             digitalWatch.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -131,11 +124,11 @@ namespace _24HWatch
             watchHour24.AddComponent<MeshFilter>();
             digitalWatch.layer = 20;
             watchHour24.layer = 20;
-            hourHandMaterial = GameObject.Find("PLAYER").transform.Find("Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand/Clock/Pivot/Hour/hour").GetComponent<MeshRenderer>().material;
-            filter = GameObject.Find("PLAYER").transform.Find("Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand/Clock/Pivot/Hour/hour").GetComponent<MeshFilter>().mesh;
+            hourHandMaterial = GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand/Clock/Pivot/Hour/hour").GetComponent<MeshRenderer>().material;
+            filter = GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand/Clock/Pivot/Hour/hour").GetComponent<MeshFilter>().mesh;
             watchHour24.transform.GetComponent<MeshRenderer>().material = hourHandMaterial;
             watchHour24.transform.GetComponent<MeshFilter>().mesh = filter;
-            watchHour24.transform.SetParent(GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand").transform);
+            watchHour24.transform.SetParent(wristwatchHand.transform);
             watchHour24.transform.localPosition = new Vector3(0f, 0f, 0f);
             watchHour24.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
             watchHour24.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -215,9 +208,9 @@ namespace _24HWatch
                 else
                 { debugging = true; }
             }*/
-            if (GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand").activeSelf)
+            if (wristwatchHand.activeSelf)
             {
-                if (GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand/watchHour24").activeSelf)
+                if (watchHour24.activeSelf)
                 {
                     if (debugging) { textToShow = ""; }
                     rotateY = PlayMakerGlobals.Instance.Variables.FindFsmFloat("TimeRotationHour").Value / 2 * -1;
@@ -229,11 +222,11 @@ namespace _24HWatch
                         watchHour24.transform.localRotation = Quaternion.Euler(0f, 0f, rotateY);
                     }
                 }
-                if (GameObject.Find("PLAYER/Pivot/AnimPivot/Camera/FPSCamera/FPSCamera/Watch/Animate/BreathAnim/WristwatchHand/digitalwatch(Clone)").activeSelf)
+                if (digitalWatch.activeSelf)
                 {
-                    digitalTime.GetComponent<TextMesh>().text = DigitalTime();
-                    digitalDay.GetComponent<TextMesh>().text = digitalDayArray[PlayMakerGlobals.Instance.Variables.FindFsmInt("GlobalDay").Value];
-                    digitalDate.GetComponent<TextMesh>().text = System.DateTime.Now.ToString("dd") + ",Aug";
+                    digitalTime.text = DigitalTime();
+                    digitalDay.text = digitalDayArray[PlayMakerGlobals.Instance.Variables.FindFsmInt("GlobalDay").Value];
+                    digitalDate.text = System.DateTime.Now.ToString("dd") + ",Aug";
                     if (debugging) { textToShow += " " + DigitalTime(); }
                 }
             }
